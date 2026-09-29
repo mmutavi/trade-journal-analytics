@@ -55,3 +55,39 @@
       })
     };
   }
+
+  function winsRate(trades) { return trades.length ? trades.filter(t => t.pnl > 0).length / trades.length * 100 : 0; }
+
+  function findings(summary, trades) {
+    if (!trades.length) return [];
+    const notes = [];
+    const sampleWarning = count => count < 8 ? 'Small sample; treat this as a clue, not a reliable pattern.' : '';
+    const sideResults = summary.bySide.filter(item => item.trades >= 4).sort((a, b) => b.pnl - a.pnl);
+    if (sideResults.length) {
+      const best = sideResults[0];
+      notes.push({ icon: best.pnl >= 0 ? '↗' : '↘', tone: best.pnl >= 0 ? 'good' : 'warn', title: `${best.side === 'long' ? 'Longs' : 'Shorts'} were the stronger side`, body: `${best.trades} closed trades · ${money(best.pnl)} net · ${best.winRate.toFixed(0)}% win rate. ${sampleWarning(best.trades)}` });
+    }
+    const symbols = summary.symbols.filter(item => item.trades >= 3);
+    if (symbols.length >= 2) {
+      const best = symbols[0], worst = symbols[symbols.length - 1];
+      notes.push({ icon: '◎', tone: best.pnl >= 0 ? 'good' : 'warn', title: `${best.symbol} led this sample`, body: `${best.trades} trades contributed ${money(best.pnl)}; ${worst.symbol} was lowest at ${money(worst.pnl)}. These are historical results, not a forecast.` });
+    }
+    const sorted = trades.filter(t => t.date).slice().sort((a, b) => a.date - b.date);
+    const perDay = new Map();
+    for (const trade of sorted) {
+      const day = trade.date.toISOString().slice(0, 10);
+      perDay.set(day, (perDay.get(day) || 0) + 1);
+    }
+    const busyDay = [...perDay.entries()].sort((a, b) => b[1] - a[1])[0];
+    if (busyDay && busyDay[1] >= 5) {
+      const dailyPnl = summary.daily.find(d => d.date === busyDay[0])?.pnl ?? 0;
+      notes.push({ icon: '◷', tone: 'warn', title: 'A busy session stands out', body: `${busyDay[1]} closed trades on ${formatDate(busyDay[0])} netted ${money(dailyPnl)}. Review the sequence and whether your planned limits were followed.` });
+    }
+    const wins = trades.filter(t => t.pnl > 0), losses = trades.filter(t => t.pnl < 0);
+    if (wins.length >= 3 && losses.length >= 3) {
+      const ratio = average(wins.map(t => t.pnl)) / Math.abs(average(losses.map(t => t.pnl)));
+      notes.push({ icon: ratio >= 1 ? '�' : '!', tone: ratio >= 1 ? 'good' : 'warn', title: ratio >= 1 ? 'Average win outweighed average loss' : 'Losses were larger than wins on average', body: `Average win ${money(average(wins.map(t => t.pnl)))} vs. average loss ${money(average(losses.map(t => t.pnl)))} (ratio ${ratio.toFixed(2)}). ${sampleWarning(trades.length)}` });
+    }
+    if (!notes.length) notes.push({ icon: '◌', tone: 'warn', title: 'More trades will make comparisons useful', body: 'This upload has limited groups to compare. The numbers above describe this file only and do not establish why a strategy worked.' });
+    return notes.slice(0, 4);
+  }
