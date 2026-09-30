@@ -63,3 +63,21 @@
       notify('Loaded synthetic sample data.');
     } catch (error) { notify(error.message || 'Could not load sample data.'); }
   }
+
+  function clearData() {
+    state.allTrades = []; state.sourceName = ''; state.warnings = [];
+    $('#file-name').textContent = 'Imported trades'; $('#file-name').title = '';
+    $('#data-notice').hidden = true;
+    $('#trade-search').value = ''; state.search = '';
+    render();
+  }
+
+  function inPeriod(trades) {
+    if (state.period === 'all') return trades;
+    const dated = trades.filter(trade => trade.date);
+    if (!dated.length) return trades;
+    const latest = Math.max(...dated.map(trade => trade.date.getTime()));
+    const days = state.period === '30d' ? 30 : 90;
+    const cutoff = latest - days * 86400000;
+    return trades.filter(trade => !trade.date || trade.date.getTime() >= cutoff);
+  }
