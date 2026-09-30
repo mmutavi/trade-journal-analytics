@@ -102,3 +102,27 @@
     $('#chart-period-label').textContent = state.period === 'all' ? 'All time' : `Last ${state.period === '30d' ? '30' : '90'} days`;
     renderChart(); renderSymbols(summary); renderInsights(summary, trades); renderTable();
   }
+
+  function renderChart() { const trades = inPeriod(state.allTrades); if (trades.length) TradeCharts.draw(TradeAnalytics.summarize(trades), state.chartMode); }
+
+  function renderSymbols(summary) {
+    const list = $('#symbol-list');
+    if (!summary.symbols.length) { list.innerHTML = '<div class="table-empty">No symbol values found.</div>'; return; }
+    const max = Math.max(...summary.symbols.map(item => Math.abs(item.pnl)), 1);
+    list.innerHTML = summary.symbols.slice(0, 7).map(item => `<div class="symbol-row"><div class="symbol-row-head"><span class="symbol-name">${escapeHtml(item.symbol)}</span><span class="symbol-amount ${tone(item.pnl)}">${TradeAnalytics.money(item.pnl)}</span></div><span class="symbol-track"><span class="symbol-bar ${item.pnl < 0 ? 'loss' : ''}" style="display:block;width:${Math.max(2, Math.abs(item.pnl) / max * 100)}%"></span></span><small>${item.trades} trades · ${item.winRate.toFixed(0)}% wins</small></div>`).join('');
+  }
+
+  function renderInsights(summary, trades) {
+    const insights = TradeAnalytics.findings(summary, trades);
+    $('#insight-grid').innerHTML = insights.map(item => `<article class="insight-card"><span class="insight-icon ${item.tone === 'warn' ? 'warn' : ''}">${escapeHtml(item.icon)}</span><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.body)}</p></div></article>`).join('');
+  }
+
+  function renderTable() {
+    const body = $('#trade-rows');
+    const trades = inPeriod(state.allTrades).filter(trade => !state.search || trade.symbol.toLowerCase().includes(state.search)).slice().reverse();
+    $('#closed-count').textContent = String(inPeriod(state.allTrades).length);
+    $('#table-summary').textContent = `Showing ${trades.length} of ${inPeriod(state.allTrades).length} trades`;
+    $('#table-empty').hidden = trades.length > 0;
+    if (!trades.length) { body.innerHTML = ''; return; }
+    body.innerHTML = trades.map(trade => `<tr><td>${trade.date ? TradeAnalytics.formatDate(trade.date.toISOString().slice(0, 10)) : 'Undated'}</td><td><strong>${escapeHtml(trade.symbol)}</strong></td><td>${trade.side === 'long' || trade.side === 'short' ? `<span class="side-pill ${trade.side}">${trade.side === 'long' ? 'Long' : 'Short'}</span>` : '—'}</td><td class="numeric">${trade.quantity == null ? '—' : number(trade.quantity, 4)}</td><td class="numeric">${trade.entryPrice == null ? '—' : TradeAnalytics.money(trade.entryPrice)}</td><td class="numeric">${trade.exitPrice == null ? '—' : TradeAnalytics.money(trade.exitPrice)}</td><td class="numeric ${tone(trade.pnl)}">${TradeAnalytics.money(trade.pnl)}</td></tr>`).join('');
+  }
