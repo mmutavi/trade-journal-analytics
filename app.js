@@ -31,3 +31,21 @@
     if (file && !dropZone.contains(event.target)) { event.preventDefault(); importFile(file); }
     setTimeout(() => dropZone.classList.remove('show', 'over'), 80);
   });
+
+  async function importFile(file) {
+    if (!file.name.toLowerCase().endsWith('.csv')) return notify('Choose a .csv file to import.');
+    try {
+      const parsed = TradeCSV.parse(await file.text());
+      const { trades, openPositions } = TradeCSV.buildClosedTrades(parsed);
+      if (!trades.length) return notify('No closed trades found. Check your CSV columns and matching opening/closing fills.');
+      state.allTrades = trades;
+      state.sourceName = file.name;
+      state.warnings = [...new Set(parsed.warnings)];
+      $('#file-name').textContent = file.name;
+      $('#file-name').title = `${trades.length} closed trades${openPositions.length ? ` · ${openPositions.length} open positions excluded` : ''}`;
+      $('#data-notice').hidden = state.warnings.length === 0;
+      $('#data-notice').innerHTML = state.warnings.slice(0, 4).map(message => `<div>${escapeHtml(message)}</div>`).join('');
+      render();
+      notify(`${trades.length} closed trades loaded in this tab.`);
+    } catch (error) { notify(error.message || 'Could not read this CSV.'); }
+  }
