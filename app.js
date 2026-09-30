@@ -81,3 +81,24 @@
     const cutoff = latest - days * 86400000;
     return trades.filter(trade => !trade.date || trade.date.getTime() >= cutoff);
   }
+
+  function render() {
+    const trades = inPeriod(state.allTrades);
+    $('#empty-state').hidden = trades.length > 0;
+    $('#dashboard').hidden = trades.length === 0;
+    $('#clear-button').disabled = state.allTrades.length === 0;
+    if (!trades.length) return;
+    const summary = TradeAnalytics.summarize(trades);
+    $('#metric-pnl').textContent = TradeAnalytics.money(summary.netPnl);
+    $('#metric-pnl').className = `metric-value ${tone(summary.netPnl)}`;
+    $('#metric-pnl-foot').textContent = `${summary.totalTrades} closed trades`;
+    $('#metric-win-rate').textContent = `${summary.winRate.toFixed(1)}%`;
+    $('#metric-win-foot').textContent = `${summary.wins} wins · ${summary.losses} losses`;
+    $('#metric-profit-factor').textContent = Number.isFinite(summary.profitFactor) ? summary.profitFactor.toFixed(2) : (summary.profitFactor ? '∞' : '—');
+    $('#metric-expectancy').textContent = TradeAnalytics.money(summary.expectancy);
+    $('#metric-expectancy').className = `metric-value ${tone(summary.expectancy)}`;
+    $('#metric-drawdown').textContent = TradeAnalytics.money(summary.maxDrawdown);
+    $('#file-details').textContent = `${summary.totalTrades} closed trades`;
+    $('#chart-period-label').textContent = state.period === 'all' ? 'All time' : `Last ${state.period === '30d' ? '30' : '90'} days`;
+    renderChart(); renderSymbols(summary); renderInsights(summary, trades); renderTable();
+  }
