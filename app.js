@@ -49,3 +49,17 @@
       notify(`${trades.length} closed trades loaded in this tab.`);
     } catch (error) { notify(error.message || 'Could not read this CSV.'); }
   }
+
+  async function loadSample() {
+    try {
+      const parsed = TradeCSV.parse(window.SampleTradeCSV);
+      state.allTrades = TradeCSV.buildClosedTrades(parsed).trades;
+      state.sourceName = 'Sample trades (synthetic)';
+      state.warnings = [];
+      $('#file-name').textContent = state.sourceName;
+      $('#file-name').title = 'Synthetic example data, not actual account activity';
+      $('#data-notice').hidden = true;
+      render();
+      notify('Loaded synthetic sample data.');
+    } catch (error) { notify(error.message || 'Could not load sample data.'); }
+  }
