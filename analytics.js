@@ -91,3 +91,12 @@
     if (!notes.length) notes.push({ icon: '◌', tone: 'warn', title: 'More trades will make comparisons useful', body: 'This upload has limited groups to compare. The numbers above describe this file only and do not establish why a strategy worked.' });
     return notes.slice(0, 4);
   }
+
+  function money(value, currency = 'USD') {
+    const abs = Math.abs(value);
+    const formatted = new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 2 }).format(abs);
+    return value < 0 ? `−${formatted}` : formatted;
+  }
+  function formatDate(value) { return new Date(`${value}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); }
+  root.TradeAnalytics = { summarize, findings, money, formatDate, round };
+})(window);
