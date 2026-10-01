@@ -126,3 +126,10 @@
     if (!trades.length) { body.innerHTML = ''; return; }
     body.innerHTML = trades.map(trade => `<tr><td>${trade.date ? TradeAnalytics.formatDate(trade.date.toISOString().slice(0, 10)) : 'Undated'}</td><td><strong>${escapeHtml(trade.symbol)}</strong></td><td>${trade.side === 'long' || trade.side === 'short' ? `<span class="side-pill ${trade.side}">${trade.side === 'long' ? 'Long' : 'Short'}</span>` : '—'}</td><td class="numeric">${trade.quantity == null ? '—' : number(trade.quantity, 4)}</td><td class="numeric">${trade.entryPrice == null ? '—' : TradeAnalytics.money(trade.entryPrice)}</td><td class="numeric">${trade.exitPrice == null ? '—' : TradeAnalytics.money(trade.exitPrice)}</td><td class="numeric ${tone(trade.pnl)}">${TradeAnalytics.money(trade.pnl)}</td></tr>`).join('');
   }
+
+  function tone(value) { return value > 0 ? 'positive' : value < 0 ? 'negative' : ''; }
+  function number(value, places) { return new Intl.NumberFormat(undefined, { maximumFractionDigits: places }).format(value); }
+  function escapeHtml(value) { return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]); }
+  let toastTimer;
+  function notify(message) { const toast = $('#toast'); toast.textContent = message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 3300); }
+})();
