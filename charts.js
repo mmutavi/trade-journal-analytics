@@ -52,3 +52,8 @@
     ctx.fillStyle = muted; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     labelIndices.forEach(index => { const label = new Date(`${series[index].label}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); ctx.fillText(label, x(index), height - pad.bottom + 10); });
   }
+  function compactMoney(value) { const abs = Math.abs(value); const digits = abs >= 10000 ? `${(abs / 1000).toFixed(0)}k` : abs >= 1000 ? `${(abs / 1000).toFixed(1)}k` : `${abs.toFixed(0)}`; return `${value < 0 ? '−' : ''}$${digits}`; }
+  function emptyChart(ctx, width, height) { ctx.fillStyle = muted; ctx.font = '12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('No dated trades to plot in this period', width / 2, height / 2); }
+  window.addEventListener('resize', () => { if (current.summary) draw(current.summary, current.mode); });
+  root.TradeCharts = { draw };
+})(window);
