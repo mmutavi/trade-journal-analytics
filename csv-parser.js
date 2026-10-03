@@ -67,3 +67,32 @@
     }
     if (columns.symbol < 0) throw new Error('Could not find a symbol column. Try Symbol, Ticker, or Asset.');
     if (columns.side < 0 && columns.pnl < 0) throw new Error('Could not find Side/Action or a realized PnL column.');
+
+    const warnings = [];
+    const records = [];
+    let skipped = 0;
+    for (let i = 1; i < rows.length; i++) {
+      const cells = rows[i];
+      const get = key => columns[key] >= 0 ? (cells[columns[key]] ?? '').trim() : '';
+      const symbol = get('symbol').toUpperCase();
+      if (!symbol) { skipped++; continue; }
+      const sideText = get('side').toLowerCase();
+      let side = null;
+      if (/\b(short|sell|sold|s)\b/.test(sideText)) side = 'short';
+      else if (/\b(long|buy|bought|buy to cover|cover|b)\b/.test(sideText)) side = 'long';
+      if (columns.side >= 0 && !side && columns.pnl < 0) { skipped++; continue; }
+      const { date, sortTime } = parseDate(get('timestamp'), i);
+      if (get('timestamp') && !date) warnings.push(`Row ${i + 1}: date could not be read; it will appear as undated.`);
+      const quantity = Math.abs(numeric(get('quantity')) ?? 0);
+      const price = numeric(get('price'));
+      const entryPrice = numeric(get('entryPrice'));
+      const exitPrice = numeric(get('exitPrice'));
+      const pnl = numeric(get('pnl'));
+      const fees = Math.abs(numeric(get('fees')) ?? 0);
+      const directClosed = pnl !== null && (entryPrice !== null || exitPrice !== null || price === null || !side);
+      records.push({ rowNumber: i + 1, symbol, side, quantity, price, entryPrice, exitPrice, pnl, fees, directClosed, date, sortTime, tradeId: get('tradeId') });
+    }
+    if (skipped) warnings.push(`${skipped} row${skipped === 1 ? '' : 's'} skipped because required values were missing.`);
+    if (!records.length) throw new Error('No usable trade rows found. Check that the file has valid symbols and trade data.');
+    return { records, warnings, columns, rowCount: rows.length - 1 };
+  }
