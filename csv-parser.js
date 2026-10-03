@@ -13,3 +13,26 @@
     fees: ['fees', 'fee', 'commission', 'commissions', 'transaction fee'],
     tradeId: ['trade id', 'trade', 'order id', 'position id']
   };
+
+  function parseRows(text) {
+    const rows = [];
+    let row = [], field = '', quoted = false;
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      if (quoted) {
+        if (char === '"' && text[i + 1] === '"') { field += '"'; i++; }
+        else if (char === '"') quoted = false;
+        else field += char;
+      } else if (char === '"' && field.length === 0) quoted = true;
+      else if (char === ',') { row.push(field); field = ''; }
+      else if (char === '\n' || char === '\r') {
+        if (char === '\r' && text[i + 1] === '\n') i++;
+        row.push(field); field = '';
+        if (row.some(cell => cell.trim() !== '')) rows.push(row);
+        row = [];
+      } else field += char;
+    }
+    row.push(field);
+    if (row.some(cell => cell.trim() !== '')) rows.push(row);
+    return rows;
+  }
