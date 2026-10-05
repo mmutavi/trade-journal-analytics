@@ -138,3 +138,6 @@
     if (openPositions.length) parsed.warnings.push(`${openPositions.length} unmatched opening position${openPositions.length === 1 ? '' : 's'} excluded from closed-trade stats.`);
     return { trades, openPositions };
   }
+
+  root.TradeCSV = { parse, buildClosedTrades, numeric };
+})(window);
