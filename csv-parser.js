@@ -96,3 +96,45 @@
     if (!records.length) throw new Error('No usable trade rows found. Check that the file has valid symbols and trade data.');
     return { records, warnings, columns, rowCount: rows.length - 1 };
   }
+
+  function buildClosedTrades(parsed) {
+    const trades = [];
+    const lotsBySymbol = new Map();
+    const records = parsed.records.slice().sort((a, b) => a.sortTime - b.sortTime || a.rowNumber - b.rowNumber);
+    for (const record of records) {
+      if (record.directClosed) {
+        // Exported realized PnL is treated as net as many brokers already subtract fees.
+        const net = record.pnl;
+        const gross = net + record.fees;
+        const entry = record.entryPrice ?? (record.side === 'short' ? record.exitPrice : record.price);
+        const exit = record.exitPrice ?? record.price;
+        trades.push({ symbol: record.symbol, side: record.side || 'unknown', quantity: record.quantity || null, entryPrice: entry, exitPrice: exit, grossPnl: gross, fees: record.fees, pnl: net, date: record.date, rowNumber: record.rowNumber, tradeId: record.tradeId, source: 'direct' });
+        continue;
+      }
+      if (!record.side || !record.quantity || record.price === null) {
+        parsed.warnings.push(`Row ${record.rowNumber}: needs Side, Quantity, and Price to reconstruct a round trip.`);
+        continue;
+      }
+      if (!lotsBySymbol.has(record.symbol)) lotsBySymbol.set(record.symbol, []);
+      let remaining = record.quantity;
+      let signedQuantity = record.side === 'long' ? remaining : -remaining;
+      let queue = lotsBySymbol.get(record.symbol);
+      while (remaining > 1e-10 && queue.length && Math.sign(queue[0].signedQuantity) !== Math.sign(signedQuantity)) {
+        const lot = queue[0];
+        const matched = Math.min(remaining, Math.abs(lot.signedQuantity));
+        const entryFee = lot.fee * (matched / Math.abs(lot.signedQuantity));
+        const exitFee = record.fees * (matched / record.quantity);
+        const rawPnl = lot.signedQuantity > 0 ? (record.price - lot.price) * matched : (lot.price - record.price) * matched;
+        trades.push({ symbol: record.symbol, side: lot.signedQuantity > 0 ? 'long' : 'short', quantity: matched, entryPrice: lot.price, exitPrice: record.price, grossPnl: rawPnl, fees: entryFee + exitFee, pnl: rawPnl - entryFee - exitFee, date: record.date, rowNumber: record.rowNumber, tradeId: record.tradeId, source: 'fills' });
+        lot.signedQuantity += Math.sign(signedQuantity) * matched;
+        lot.fee -= entryFee;
+        remaining -= matched;
+        if (Math.abs(lot.signedQuantity) < 1e-10) queue.shift();
+      }
+      if (remaining > 1e-10) queue.push({ signedQuantity: Math.sign(signedQuantity) * remaining, price: record.price, fee: record.fees * (remaining / record.quantity), date: record.date });
+    }
+    trades.sort((a, b) => (a.date?.getTime() ?? Number.MAX_SAFE_INTEGER) - (b.date?.getTime() ?? Number.MAX_SAFE_INTEGER) || a.rowNumber - b.rowNumber);
+    const openPositions = [...lotsBySymbol.entries()].flatMap(([symbol, queue]) => queue.map(lot => ({ symbol, side: lot.signedQuantity > 0 ? 'long' : 'short', quantity: Math.abs(lot.signedQuantity) })));
+    if (openPositions.length) parsed.warnings.push(`${openPositions.length} unmatched opening position${openPositions.length === 1 ? '' : 's'} excluded from closed-trade stats.`);
+    return { trades, openPositions };
+  }
