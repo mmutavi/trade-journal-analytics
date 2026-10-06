@@ -73,3 +73,27 @@
               <input id="file-input" type="file" accept=".csv,text/csv" hidden />
             </div>
           </section>
+
+          <div class="drop-zone" id="drop-zone">Drop a CSV anywhere on this page to open it.</div>
+
+          <section class="empty-state panel" id="empty-state">
+            <div class="empty-illustration" aria-hidden="true">
+              <div class="illus-glow"></div>
+              <svg viewBox="0 0 176 116">
+                <rect x="19" y="17" width="138" height="82" rx="13" class="illus-card"/>
+                <path d="M34 78h108" class="illus-grid"/>
+                <path d="M38 69 57 58l18 7 21-24 19 9 24-25" class="illus-line"/>
+                <circle cx="115" cy="50" r="4.5" class="illus-point"/>
+                <rect x="34" y="28" width="31" height="5" rx="2.5" class="illus-muted"/>
+                <rect x="34" y="39" width="19" height="4" rx="2" class="illus-muted"/>
+              </svg>
+            </div>
+            <p class="kicker">START WITH YOUR DATA</p>
+            <h2>Your trades, a little clearer.</h2>
+            <p class="empty-copy">Drop in a CSV export to see your equity curve, closed-trade stats, and which parts of your sample stood out.</p>
+            <div class="empty-actions">
+              <button class="button button-primary" id="empty-import-button" type="button">Choose a CSV</button>
+              <button class="text-button" id="empty-sample-button" type="button">Preview with sample trades</button>
+            </div>
+            <p class="privacy-note"><svg viewBox="0 0 18 18" aria-hidden="true"><rect x="3.5" y="7.5" width="11" height="8" rx="2"/><path d="M6 7.5V5a3 3 0 0 1 6 0v2.5"/></svg> Your file is read in this tab and never sent to a server.</p>
+          </section>
