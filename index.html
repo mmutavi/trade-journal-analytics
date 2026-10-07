@@ -97,3 +97,23 @@
             </div>
             <p class="privacy-note"><svg viewBox="0 0 18 18" aria-hidden="true"><rect x="3.5" y="7.5" width="11" height="8" rx="2"/><path d="M6 7.5V5a3 3 0 0 1 6 0v2.5"/></svg> Your file is read in this tab and never sent to a server.</p>
           </section>
+
+          <section id="dashboard" hidden>
+            <div class="data-strip">
+              <div class="file-summary">
+                <span class="file-icon" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M5 2.5h6l4 4v10A1.5 1.5 0 0 1 13.5 18h-8A1.5 1.5 0 0 1 4 16.5v-12A2 2 0 0 1 5 2.5Z"/><path d="M11 2.5v4h4M7 11h6m-6 3h6"/></svg></span>
+                <div><strong id="file-name">Imported trades</strong><span id="file-details">0 closed trades</span></div>
+              </div>
+              <div class="data-actions">
+                <label class="period-select">Period
+                  <select id="period-filter" aria-label="Filter by date range">
+                    <option value="all">All time</option>
+                    <option value="90">Last 90 days</option>
+                    <option value="30">Last 30 days</option>
+                  </select>
+                </label>
+                <button class="icon-button" id="clear-button" type="button" aria-label="Clear imported data" title="Clear imported data">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5.5h12M8 5.5v-2h4v2m-6 0 .7 11h6.6l.7-11M8.5 8.5v5m3-5v5"/></svg>
+                </button>
+              </div>
+            </div>
