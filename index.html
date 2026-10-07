@@ -147,3 +147,52 @@
                 <span class="metric-foot">Peak to following trough</span>
               </article>
             </div>
+
+            <div class="content-grid">
+              <section class="panel chart-panel" aria-labelledby="chart-heading">
+                <div class="panel-heading">
+                  <div><p class="kicker">CLOSED-TRADE PERFORMANCE</p><h2 id="chart-heading">Equity curve</h2></div>
+                  <div class="chart-controls" role="group" aria-label="Chart type">
+                    <button class="chart-tab active" data-chart="equity" type="button">Equity</button>
+                    <button class="chart-tab" data-chart="daily" type="button">Daily P&amp;L</button>
+                  </div>
+                </div>
+                <div class="chart-legend"><span><i class="legend-dot"></i><span id="chart-legend-label">Cumulative net P&amp;L</span></span><span id="chart-period-label">All time</span></div>
+                <div class="chart-wrap"><canvas id="performance-chart" aria-label="Cumulative net profit and loss chart"></canvas><div class="chart-empty" id="chart-empty" hidden>Import closed trades with dates to draw a chart.</div></div>
+              </section>
+
+              <section class="panel breakdown-panel">
+                <div class="panel-heading compact-heading">
+                  <div><p class="kicker">WHERE RESULTS CAME FROM</p><h2>By symbol</h2></div>
+                  <span class="subtle-label">Net P&amp;L</span>
+                </div>
+                <div class="symbol-list" id="symbol-list"></div>
+              </section>
+            </div>
+
+            <section class="panel pattern-panel" id="patterns">
+              <div class="panel-heading">
+                <div><p class="kicker">A LOOK BACK, NOT A FORECAST</p><h2>Patterns in this sample</h2></div>
+                <span class="sample-caveat">Descriptive, not predictive</span>
+              </div>
+              <div class="insight-grid" id="insight-grid"></div>
+            </section>
+
+            <section class="panel trades-panel" id="trades">
+              <div class="panel-heading trades-heading">
+                <div><p class="kicker">ROUND TRIPS &amp; REALIZED TRADES</p><h2>Closed trades <span class="count-pill" id="closed-count">0</span></h2></div>
+                <label class="search-box">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg>
+                  <input id="trade-search" type="search" placeholder="Find a symbol" aria-label="Search closed trades" />
+                </label>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Date</th><th>Symbol</th><th>Side</th><th class="numeric">Qty</th><th class="numeric">Entry</th><th class="numeric">Exit</th><th class="numeric">Net P&amp;L</th></tr></thead>
+                  <tbody id="trade-rows"></tbody>
+                </table>
+                <div class="table-empty" id="table-empty" hidden>No closed trades match this view.</div>
+              </div>
+              <div class="table-footer"><span id="table-summary">Showing 0 trades</span><span>Imported data is not retained after you close or refresh this tab.</span></div>
+            </section>
+          </section>
