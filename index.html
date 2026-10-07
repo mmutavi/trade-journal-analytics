@@ -117,3 +117,33 @@
                 </button>
               </div>
             </div>
+
+            <div class="notice" id="data-notice" role="status" hidden></div>
+
+            <div class="metric-grid" aria-label="Performance summary">
+              <article class="metric-card">
+                <div class="metric-top"><span>Net P&amp;L</span><span class="metric-symbol green">↗</span></div>
+                <strong class="metric-value" id="metric-pnl">$0.00</strong>
+                <span class="metric-foot" id="metric-pnl-foot">Across closed trades</span>
+              </article>
+              <article class="metric-card">
+                <div class="metric-top"><span>Win rate</span><span class="metric-symbol blue">%</span></div>
+                <strong class="metric-value" id="metric-win-rate">—</strong>
+                <span class="metric-foot" id="metric-win-foot">Winning trades / all closes</span>
+              </article>
+              <article class="metric-card">
+                <div class="metric-top"><span>Profit factor</span><span class="metric-symbol violet">⇄</span></div>
+                <strong class="metric-value" id="metric-profit-factor">—</strong>
+                <span class="metric-foot">Gross wins ÷ gross losses</span>
+              </article>
+              <article class="metric-card">
+                <div class="metric-top"><span>Expectancy</span><span class="metric-symbol amber">�</span></div>
+                <strong class="metric-value" id="metric-expectancy">$0.00</strong>
+                <span class="metric-foot">Average net P&amp;L per close</span>
+              </article>
+              <article class="metric-card">
+                <div class="metric-top"><span>Max drawdown</span><span class="metric-symbol rose">⌄</span></div>
+                <strong class="metric-value" id="metric-drawdown">$0.00</strong>
+                <span class="metric-foot">Peak to following trough</span>
+              </article>
+            </div>
